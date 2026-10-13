@@ -25,6 +25,14 @@ data = {
       gear = { type = "item", name = "gear", stack_size = 100 },
       plate = { type = "item", name = "plate", stack_size = 100 },
     },
+    tool = {
+      ["automation-science-pack"] = { type = "tool", name = "automation-science-pack" },
+      ["logistic-science-pack"] = { type = "tool", name = "logistic-science-pack" },
+    },
+    ["space-connection"] = {
+      ["nauvis-vulcanus"] = { type = "space-connection", name = "nauvis-vulcanus", from = "nauvis", to = "vulcanus" },
+      ["vulcanus-fulgora"] = { type = "space-connection", name = "vulcanus-fulgora", from = "vulcanus", to = "fulgora" },
+    },
   },
 }
 
@@ -38,6 +46,8 @@ end
 local Recipe = require("__razi_lib__/lib/recipe")
 local Technology = require("__razi_lib__/lib/technology")
 local Prototype = require("__razi_lib__/lib/prototype")
+local Science = require("__razi_lib__/lib/science")
+local SpaceConnection = require("__razi_lib__/lib/space_connection")
 
 test("wrappers retain independent targets", function()
   local alpha = Recipe.get("alpha")
@@ -81,6 +91,37 @@ test("technology edits are idempotent", function()
   assert(#data.raw.technology.automation.prerequisites == 1)
   assert(#data.raw.technology.automation.effects == 1)
   assert(#data.raw.technology.automation.unit.ingredients == 3)
+  assert(Technology.get("automation"):has_prerequisite("logistics"))
+  assert(Technology.get("automation"):has_unlock("alpha"))
+  assert(Technology.get("automation"):has_pack("chemical-science-pack"))
+  assert(Technology.first_existing_name({ "missing", "automation" }) == "automation")
+  assert(Technology.has_dependents("logistics"))
+end)
+
+test("recipe inspection covers variants", function()
+  data.raw.recipe.beta.normal = { ingredients = { { "plate", 2 } } }
+  assert(Recipe.exists("beta"))
+  assert(Recipe.get("beta"):has_ingredient("plate"))
+end)
+
+test("science helpers compose available packs and labs", function()
+  local ingredients = Science.build_ingredients({
+    primary_science_packs = { "automation-science-pack", "missing-pack" },
+    first_available_science_packs = { "missing-pack", "logistic-science-pack" },
+  })
+  assert(#ingredients == 2)
+  assert(Science.add_pack(ingredients, "automation-science-pack") == false)
+  local lab = { inputs = { "automation-science-pack" } }
+  assert(Science.add_lab_input(lab, "logistic-science-pack"))
+  assert(Science.lab_has_input(lab, "logistic-science-pack"))
+end)
+
+test("space connection helpers remove only selected routes", function()
+  SpaceConnection.remove_between("vulcanus", "nauvis")
+  assert(data.raw["space-connection"]["nauvis-vulcanus"] == nil)
+  assert(data.raw["space-connection"]["vulcanus-fulgora"] ~= nil)
+  SpaceConnection.remove_except_locations({ "nauvis" })
+  assert(next(data.raw["space-connection"]) == nil)
 end)
 
 test("generic clones and wrappers remain typed", function()

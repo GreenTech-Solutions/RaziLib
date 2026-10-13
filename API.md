@@ -23,9 +23,9 @@ Wrappers proxy ordinary prototype fields, so `Recipe.get("x").ingredients` works
 
 ### `lib/recipe`
 
-- `get`, `optional`, `clone`
+- `get`, `optional`, `exists`, `clone`
 - `set_ingredients`, `set_results`, `add_ingredient`, `upsert_ingredient`
-- `remove_ingredient`, `replace_ingredient`, `add_result`, `remove_result`
+- `has_ingredient`, `remove_ingredient`, `replace_ingredient`, `add_result`, `remove_result`
 - `set_energy`, `set_categories`, `set_category`, `add_category`, `set_subgroup`, `set_modules`
 - `enable`, `disable`, `set_conditions`, `set_recycling`, `set_main_product`
 - `set_quality_selectable`, `set_ingredient_sorting`
@@ -36,12 +36,24 @@ Ingredient and category setters apply to normal and expensive variants when they
 
 ### `lib/technology`
 
-- `get`, `optional`, `clone`, `register_science`
-- `set_cost`, `set_cost_formula`, `set_time`, `set_packs`, `set_colors`, `add_pack`
-- `set_effects`, `add_effect`, `unlock`, `remove_unlock`
-- `set_prerequisites`, `add_prerequisite`, `remove_prerequisite`, `set_infinite`
+- `get`, `optional`, `exists`, `first_existing`, `first_existing_name`, `clone`, `register_science`
+- `has_dependents`, `set_cost`, `set_cost_formula`, `set_time`, `set_packs`, `set_colors`, `add_pack`, `has_pack`
+- `set_effects`, `add_effect`, `unlock`, `has_unlock`, `remove_unlock`
+- `set_prerequisites`, `add_prerequisite`, `has_prerequisite`, `remove_prerequisite`, `set_infinite`
 
 Built-in science codes: `R G B M P Y W V F A C S`.
+
+### `lib/science`
+
+Science-pack discovery and composition with `exists`, `add_pack`, `add_existing`,
+`add_first_existing`, `collect_from_technologies`, `collect_from_recipes`,
+`build_ingredients`, `lab_has_input`, and `add_lab_input`.
+
+### `lib/space_connection`
+
+Optional Space Age route editing with `remove`, `remove_between`, `remove_all`,
+and `remove_except_locations`. The module remains passive and does not add a
+Space Age dependency.
 
 ### `lib/item`, `lib/entity`, `lib/module`
 

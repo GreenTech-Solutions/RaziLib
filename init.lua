@@ -4,6 +4,8 @@ return {
   Prototype = require("__razi_lib__/lib/prototype"),
   Recipe = require("__razi_lib__/lib/recipe"),
   Technology = require("__razi_lib__/lib/technology"),
+  Science = require("__razi_lib__/lib/science"),
+  SpaceConnection = require("__razi_lib__/lib/space_connection"),
   Item = require("__razi_lib__/lib/item"),
   Entity = require("__razi_lib__/lib/entity"),
   Module = require("__razi_lib__/lib/module"),

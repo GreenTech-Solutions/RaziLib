@@ -85,6 +85,10 @@ function Recipe.optional(self_or_name, maybe_name)
   return Prototype.optional("recipe", requested_name(self_or_name, maybe_name), methods)
 end
 
+function Recipe.exists(self_or_name, maybe_name)
+  return Prototype.exists("recipe", requested_name(self_or_name, maybe_name))
+end
+
 function Recipe.clone(self_or_from, from_or_into, maybe_into)
   local from = maybe_into and from_or_into or self_or_from
   local into = maybe_into or from_or_into
@@ -189,6 +193,19 @@ function methods:remove_ingredient(name, ingredient_type)
     end
     variant.ingredients = filtered
   end)
+end
+
+function methods:has_ingredient(name, ingredient_type)
+  for _, variant in ipairs(variants(self._prototype)) do
+    for _, ingredient in pairs(variant.ingredients or {}) do
+      if entry_name(ingredient) == name
+        and (not ingredient_type or (ingredient.type or "item") == ingredient_type)
+      then
+        return true
+      end
+    end
+  end
+  return false
 end
 
 function methods:replace_ingredient(old_name, replacement)

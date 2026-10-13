@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 13-10-2026
+  Features:
+    - Added reusable science-pack, lab-input, and Space Age connection helpers.
+    - Added recipe inspection plus technology lookup, dependency, pack, prerequisite, and unlock queries.
+  Changes:
+    - Expanded the public module map and regression suite for Razi Protocol integration.
+
+---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 01-08-2026
   Features:

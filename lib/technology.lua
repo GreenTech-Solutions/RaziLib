@@ -34,6 +34,32 @@ function Technology.optional(self_or_name, maybe_name)
   return Prototype.optional("technology", requested_name(self_or_name, maybe_name), methods)
 end
 
+function Technology.exists(self_or_name, maybe_name)
+  return Prototype.exists("technology", requested_name(self_or_name, maybe_name))
+end
+
+function Technology.first_existing(names)
+  for _, name in ipairs(names or {}) do
+    local technology = Technology.optional(name)
+    if technology then return technology end
+  end
+  return nil
+end
+
+function Technology.first_existing_name(names)
+  local technology = Technology.first_existing(names)
+  return technology and technology._name or nil
+end
+
+function Technology.has_dependents(name)
+  for _, technology in pairs(data.raw.technology or {}) do
+    for _, prerequisite in ipairs(technology.prerequisites or {}) do
+      if prerequisite == name then return true end
+    end
+  end
+  return false
+end
+
 function Technology.clone(self_or_from, from_or_into, maybe_into)
   local from = maybe_into and from_or_into or self_or_from
   local into = maybe_into or from_or_into
@@ -91,6 +117,13 @@ function methods:add_pack(name, amount)
   return self
 end
 
+function methods:has_pack(name)
+  for _, pack in pairs(self._prototype.unit and self._prototype.unit.ingredients or {}) do
+    if (pack.name or pack[1]) == name then return true end
+  end
+  return false
+end
+
 function methods:set_effects(effects) self._prototype.effects = Core.deepcopy(effects); return self end
 function methods:set_prerequisites(prerequisites) self._prototype.prerequisites = Core.deepcopy(prerequisites); return self end
 
@@ -101,6 +134,13 @@ function methods:add_prerequisite(name)
   end
   self._prototype.prerequisites[#self._prototype.prerequisites + 1] = name
   return self
+end
+
+function methods:has_prerequisite(name)
+  for _, prerequisite in pairs(self._prototype.prerequisites or {}) do
+    if prerequisite == name then return true end
+  end
+  return false
 end
 
 function methods:remove_prerequisite(name)
@@ -128,6 +168,13 @@ end
 
 function methods:unlock(recipe_name)
   return self:add_effect({ type = "unlock-recipe", recipe = recipe_name })
+end
+
+function methods:has_unlock(recipe_name)
+  for _, effect in pairs(self._prototype.effects or {}) do
+    if effect.type == "unlock-recipe" and effect.recipe == recipe_name then return true end
+  end
+  return false
 end
 
 function methods:remove_unlock(recipe_name)

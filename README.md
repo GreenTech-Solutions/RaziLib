@@ -18,7 +18,7 @@ provides opt-in helpers and makes no gameplay changes by itself.
 ## Dependency
 
 ```json
-"dependencies": ["razi_lib >= 1.0.0"]
+"dependencies": ["razi_lib >= 1.1.0"]
 ```
 
 ## Quick start
