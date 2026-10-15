@@ -129,6 +129,22 @@ function Recipe.normalize_all_2_1()
   return Recipe
 end
 
+-- Read-only inspection of a native recipe or existing recipe name.
+-- Works with legacy result, Factorio 2.1 results, and difficulty variants.
+function Recipe.produces(recipe, name)
+  if type(recipe) == "string" then
+    recipe = data.raw.recipe and data.raw.recipe[recipe]
+  end
+  if not recipe or not name then return false end
+  for _, variant in ipairs(variants(recipe)) do
+    if variant.result == name then return true end
+    for _, result in ipairs(variant.results or {}) do
+      if entry_name(result) == name then return true end
+    end
+  end
+  return false
+end
+
 Recipe.cloneInto = Recipe.clone
 
 function methods:each_variant(callback)

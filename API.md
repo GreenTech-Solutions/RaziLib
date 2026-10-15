@@ -10,7 +10,7 @@ Assertions, deep copy, clamp, recursive merge, sorted keys, and stage detection.
 
 ### `lib/collections`
 
-`contains`, `append_unique`, `remove`, `index_by`, `map`, and `copy`.
+`contains`, `append_unique`, `unique` (stable array deduplication), `remove`, `index_by`, `map`, and `copy`.
 
 ### `lib/prototype`
 
@@ -21,9 +21,20 @@ Assertions, deep copy, clamp, recursive merge, sorted keys, and stage detection.
 
 Wrappers proxy ordinary prototype fields, so `Recipe.get("x").ingredients` works.
 
+### `lib/technology_graph` (new in 1.2.0)
+
+- `reaches(technologies, from, ancestor)`: iterative, cycle-safe traversal
+- `find_cycle(technologies)`: deterministic cycle witness without recursion
+- `add_prerequisite(technologies, technology, prerequisite)`: idempotent,
+  cycle-proof insertion; requires both prototypes to exist
+- `unlock_index(technologies)`, `first_unlock(technologies, recipe, visible_only)`:
+  sorted source-recipe unlocking lookup
+- No global caches, implicit graph mutation or source-mod policy: consumers
+  decide which nodes/edges they own and whether disabled techs are eligible.
+
 ### `lib/recipe`
 
-- `get`, `optional`, `exists`, `clone`
+- `get`, `optional`, `exists`, `clone`, `produces` (read-only, supports recipe variants)
 - `set_ingredients`, `set_results`, `add_ingredient`, `upsert_ingredient`
 - `has_ingredient`, `remove_ingredient`, `replace_ingredient`, `add_result`, `remove_result`
 - `set_energy`, `set_categories`, `set_category`, `add_category`, `set_subgroup`, `set_modules`

@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 15. 10. 2026
+  Reusable Factorio technology-graph and prototype inspection:
+    - Add iterative ancestry and deterministic cycle detection without recursive-stack exhaustion.
+    - Add cycle-safe, nonduplicating prerequisite edits and sorted native recipe-unlock indexes.
+    - Add read-only recipe output matching (normal, expensive and legacy forms).
+    - Add stable ordered collection deduplication for lab and science input lists.
+    - Document public APIs and test missing nodes, circular graphs, long research chains, and duplicate effects.
+    - No gameplay changes, global event handlers or dependency on Space Age.
+
 Version: 1.1.0
 Date: 13-10-2026
   Features:

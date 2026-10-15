@@ -48,6 +48,8 @@ local Technology = require("__razi_lib__/lib/technology")
 local Prototype = require("__razi_lib__/lib/prototype")
 local Science = require("__razi_lib__/lib/science")
 local SpaceConnection = require("__razi_lib__/lib/space_connection")
+local Graph = require("__razi_lib__/lib/technology_graph")
+local Collections = require("__razi_lib__/lib/collections")
 
 test("wrappers retain independent targets", function()
   local alpha = Recipe.get("alpha")
@@ -164,6 +166,69 @@ test("storage namespaces isolate defaults", function()
   local state = Storage.namespace("example", { count = 1 })
   assert(state:update("count", function(value) return value + 2 end) == 3)
   assert(storage.example.count == 3)
+end)
+
+
+test("ordered collection unique preserves first occurrence", function()
+  local unique = Collections.unique({"one", "two", "one", "three", "two"})
+  assert(table.concat(unique, ",") == "one,two,three")
+  local entries = Collections.unique({{name="A",v=1},{name="A",v=2},{name="B",v=3}}, "name")
+  assert(#entries == 2 and entries[1].v == 1 and entries[2].name == "B")
+end)
+
+test("recipe read-only product inspection includes variants", function()
+  assert(Recipe.produces("alpha", "gear"))
+  assert(Recipe.produces(data.raw.recipe.beta, "plate") == false)
+  assert(Recipe.produces({normal={results={{"rare-item",2}}}}, "rare-item"))
+  assert(not Recipe.produces(nil, "rare-item"))
+end)
+
+test("iterative technology ancestry tolerates missing nodes and cycles", function()
+  local graph = {
+    a={prerequisites={"b","missing"}},
+    b={prerequisites={"c"}},
+    c={prerequisites={"a"}},
+    other={prerequisites={}}
+  }
+  assert(Graph.reaches(graph,"a","c"))
+  assert(not Graph.reaches(graph,"a","other"))
+  assert(Graph.reaches(graph,"missing","missing"))
+  assert(table.concat(Graph.find_cycle(graph), ",") == "a,b,c")
+  assert(not Graph.add_prerequisite(graph,"b","a"))
+  assert(Graph.add_prerequisite(graph,"other","a"))
+  assert(not Graph.add_prerequisite(graph,"a","other"))
+end)
+
+test("safe prerequisite insertion and unlock lookup stay idempotent", function()
+  local graph = {
+    a={prerequisites={}},
+    b={prerequisites={"a"},effects={{type="unlock-recipe",recipe="gear"},
+      {type="unlock-recipe",recipe="gear"}}},
+    c={prerequisites={},effects={{type="unlock-recipe",recipe="gear"}}},
+    disabled={enabled=false,effects={{type="unlock-recipe",recipe="gear"}}}
+  }
+  assert(not Graph.add_prerequisite(graph,"a","b"))
+  assert(not Graph.add_prerequisite(graph,"b","a"))
+  assert(Graph.add_prerequisite(graph,"c","b"))
+  assert(not Graph.add_prerequisite(graph,"c","a"))
+  assert(not Graph.add_prerequisite(graph,"c","b"))
+  assert(#graph.c.prerequisites == 1)
+  local index=Graph.unlock_index(graph)
+  assert(table.concat(index.gear,",")=="b,c,disabled")
+  assert(Graph.first_unlock(graph,"gear",true)=="b")
+  graph.b.hidden=true
+  assert(Graph.first_unlock(graph,"gear",true)=="c")
+end)
+
+test("deep technology chain avoids recursive stack overflow", function()
+  local graph={}
+  for i=1,4000 do
+    graph["chain-"..i]={prerequisites=i>1 and {"chain-"..(i-1)} or {}}
+  end
+  assert(Graph.reaches(graph,"chain-4000","chain-1"))
+  assert(Graph.find_cycle(graph)==nil)
+  graph["chain-1"].prerequisites={"chain-4000"}
+  assert(Graph.find_cycle(graph)~=nil)
 end)
 
 io.write(("RAZI Library: %d tests passed\n"):format(passed))

@@ -40,6 +40,23 @@ function Collections.map(list, mapper)
   return mapped
 end
 
+-- Stable array deduplication: no hash-table iteration reordering.
+-- 'key' accepts a field name or identity callback for records.
+function Collections.unique(list, key)
+  local result, seen = {}, {}
+  for _, entry in ipairs(list or {}) do
+    local identity = entry
+    if type(key) == "function" then identity = key(entry)
+    elseif key then identity = entry[key] end
+    if identity == nil then identity = entry end
+    if not seen[identity] then
+      seen[identity] = true
+      result[#result + 1] = entry
+    end
+  end
+  return result
+end
+
 function Collections.copy(list)
   return Core.deepcopy(list or {})
 end

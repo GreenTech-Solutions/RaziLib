@@ -18,7 +18,7 @@ provides opt-in helpers and makes no gameplay changes by itself.
 ## Dependency
 
 ```json
-"dependencies": ["razi_lib >= 1.1.0"]
+"dependencies": ["razi_lib >= 1.2.0"]
 ```
 
 ## Quick start
@@ -43,6 +43,21 @@ local icons = Icons.compose("__base__/graphics/icons/iron-plate.png", 64, {
 ```
 
 See [API.md](API.md) for the complete module map and migration notes.
+
+## Safe technology graph operations
+
+```lua
+local Graph = require("__razi_lib__/lib/technology_graph")
+local techs = data.raw.technology
+if not Graph.reaches(techs, "new-industry", "existing-industry") then
+  Graph.add_prerequisite(techs, "new-industry", "existing-industry")
+end
+local existing_cycle = Graph.find_cycle(techs)
+-- A source-specific compatibility module must decide whether to repair it.
+```
+
+The iterative traversal handles thousands of interdependent technologies
+without recursion and never removes source-authored research automatically.
 
 ## Runtime orchestration
 
